@@ -26,6 +26,8 @@ class ManagerPanelProvider extends PanelProvider
             ->id('manager')
             ->path('manager')
             ->login()
+            ->profile()
+            ->passwordReset()
             ->colors([
                 'primary' => Color::Blue,
             ])
