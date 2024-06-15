@@ -45,7 +45,7 @@ class UserFactory extends Factory
     public function restaurant_manager()
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'restaurant_manager',
+            'role' => 'manager',
         ]);
     }
 }

@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::factory()->count(5)->create([
-            'role' => 'restaurant_manager',
+            'role' => 'manager',
         ]);
     }
 }
