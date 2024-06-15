@@ -41,4 +41,11 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function restaurant_manager()
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'restaurant_manager',
+        ]);
+    }
 }
