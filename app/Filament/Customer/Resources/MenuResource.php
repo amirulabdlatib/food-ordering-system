@@ -2,16 +2,20 @@
 
 namespace App\Filament\Customer\Resources;
 
-use App\Filament\Customer\Resources\MenuResource\Pages;
-use App\Filament\Customer\Resources\MenuResource\RelationManagers;
-use App\Models\Menu;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Menu;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Restaurant;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Customer\Resources\MenuResource\Pages;
+use App\Filament\Customer\Resources\MenuResource\RelationManagers;
 
 class MenuResource extends Resource
 {
@@ -43,7 +47,7 @@ class MenuResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('restaurant_id')
+                Tables\Columns\TextColumn::make('restaurant.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
@@ -63,7 +67,15 @@ class MenuResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                SelectFilter::make('restaurant_id')
+                ->label('Restaurant Name')
+                ->preload()
+                ->searchable()
+                ->options(
+                    Restaurant::pluck('name', 'id')
+                )
+                ],layout:FiltersLayout::AboveContent)
+                ->filtersFormColumns(1)
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
