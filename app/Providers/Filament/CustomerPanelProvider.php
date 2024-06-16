@@ -52,6 +52,7 @@ class CustomerPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                'customer'
             ])
             ->authMiddleware([
                 Authenticate::class,
