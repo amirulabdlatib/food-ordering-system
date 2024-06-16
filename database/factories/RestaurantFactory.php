@@ -25,7 +25,7 @@ class RestaurantFactory extends Factory
             'address' => $this->faker->address(),
             'phone_number' => $this->faker->phoneNumber(),
             'description' => $this->faker->paragraph(),
-            'category_id' => Category::factory(),
+            'category_id' => $this->faker->numberBetween(1, 5),
             'manager_id' => User::factory()->restaurant_manager()->create()->id,
             'is_approved' => $this->faker->boolean(),
             'status'=>$this->faker->boolean()
