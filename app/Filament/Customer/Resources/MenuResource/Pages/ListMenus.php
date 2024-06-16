@@ -13,6 +13,9 @@ class ListMenus extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('Make order')
+            ->color('primary')
+            ->url('/')
         ];
     }
 }

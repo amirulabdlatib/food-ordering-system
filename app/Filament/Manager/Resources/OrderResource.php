@@ -28,13 +28,11 @@ class OrderResource extends Resource
                 Forms\Components\TextInput::make('restaurant_id')
                     ->required()
                     ->numeric(),
-                Forms\Components\DateTimePicker::make('order_date')
+                Forms\Components\TextInput::make('order_type')
                     ->required(),
                 Forms\Components\TextInput::make('total_amount')
                     ->required()
                     ->numeric(),
-                Forms\Components\Toggle::make('delivery_or_pickup')
-                    ->required(),
                 Forms\Components\TextInput::make('payment_method')
                     ->required()
                     ->maxLength(255),
@@ -54,14 +52,10 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('restaurant_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('order_date')
-                    ->dateTime()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('order_type'),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('delivery_or_pickup')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('payment_method')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order_status')
@@ -84,7 +78,6 @@ class OrderResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -96,12 +89,6 @@ class OrderResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->where('id', auth()->id());
-    }
-
     public static function getPages(): array
     {
         return [
@@ -111,4 +98,6 @@ class OrderResource extends Resource
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
+
+    
 }

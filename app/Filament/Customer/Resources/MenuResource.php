@@ -47,6 +47,7 @@ class MenuResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
+                ->label('Item')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->money()
@@ -68,7 +69,6 @@ class MenuResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -81,12 +81,17 @@ class MenuResource extends Resource
     }
     
     
-    
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListMenus::route('/'),
             'view' => Pages\ViewMenu::route('/{record}'),
         ];
+    }
+
+
+    public static function canCreate(): bool
+    {
+        return abort(403);
     }
 }
