@@ -17,7 +17,7 @@ class CategorySeeder extends Seeder
         $categories = ['Asian', 'Western', 'Desserts', 'Fast Food', 'Vegetarian'];
 
         foreach ($categories as $category) {
-            Category::factory()->create([
+            Category::create([
                 'name' => $category,
             ]);
         }

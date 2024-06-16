@@ -28,6 +28,7 @@ class RestaurantFactory extends Factory
             'category_id' => Category::factory(),
             'manager_id' => User::factory()->restaurant_manager()->create()->id,
             'is_approved' => $this->faker->boolean(),
+            'status'=>$this->faker->boolean()
         ];
     }
 }
