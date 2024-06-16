@@ -15,7 +15,7 @@ class ListMenus extends ListRecords
         return [
             Actions\Action::make('Make order')
             ->color('primary')
-            ->url('/')
+            ->url('/customer/orders/create')
         ];
     }
 }
