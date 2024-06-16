@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Manager\Resources;
+namespace App\Filament\Customer\Resources;
 
-use App\Filament\Manager\Resources\LoyaltyPointResource\Pages;
-use App\Filament\Manager\Resources\LoyaltyPointResource\RelationManagers;
-use App\Models\LoyaltyPoint;
+use App\Filament\Customer\Resources\MenuResource\Pages;
+use App\Filament\Customer\Resources\MenuResource\RelationManagers;
+use App\Models\Menu;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class LoyaltyPointResource extends Resource
+class MenuResource extends Resource
 {
-    protected static ?string $model = LoyaltyPoint::class;
+    protected static ?string $model = Menu::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -23,17 +23,19 @@ class LoyaltyPointResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('customer_id')
+                Forms\Components\TextInput::make('restaurant_id')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('points_earned')
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('description')
+                    ->required()
+                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('points_redeemed')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->prefix('$'),
             ]);
     }
 
@@ -41,14 +43,13 @@ class LoyaltyPointResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer_id')
+                Tables\Columns\TextColumn::make('restaurant_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('points_earned')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('points_redeemed')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->money()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -64,7 +65,6 @@ class LoyaltyPointResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -79,14 +79,14 @@ class LoyaltyPointResource extends Resource
             //
         ];
     }
-
+    
+    
+    
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListLoyaltyPoints::route('/'),
-            'create' => Pages\CreateLoyaltyPoint::route('/create'),
-            'view' => Pages\ViewLoyaltyPoint::route('/{record}'),
-            'edit' => Pages\EditLoyaltyPoint::route('/{record}/edit'),
+            'index' => Pages\ListMenus::route('/'),
+            'view' => Pages\ViewMenu::route('/{record}'),
         ];
     }
 }

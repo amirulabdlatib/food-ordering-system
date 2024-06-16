@@ -77,6 +77,12 @@ class SaleResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('id', auth()->id());
+    }
+
     public static function getPages(): array
     {
         return [
