@@ -94,7 +94,6 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
             'view' => Pages\ViewOrder::route('/{record}'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
@@ -103,5 +102,16 @@ class OrderResource extends Resource
     public static function canDelete(Model $record): bool
     {
         return abort(403);
+    }
+
+    public static function canCreate(): bool
+    {
+        return abort(403);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('id', auth()->id());
     }
 }

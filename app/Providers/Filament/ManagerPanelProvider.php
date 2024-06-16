@@ -25,6 +25,7 @@ class ManagerPanelProvider extends PanelProvider
         return $panel
             ->id('manager')
             ->path('manager')
+            ->sidebarCollapsibleOnDesktop()
             ->login()
             ->profile()
             ->passwordReset()
@@ -34,7 +35,7 @@ class ManagerPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Manager/Resources'), for: 'App\\Filament\\Manager\\Resources')
             ->discoverPages(in: app_path('Filament/Manager/Pages'), for: 'App\\Filament\\Manager\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                // Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Manager/Widgets'), for: 'App\\Filament\\Manager\\Widgets')
             ->widgets([

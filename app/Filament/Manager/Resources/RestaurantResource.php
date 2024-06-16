@@ -1,48 +1,67 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Manager\Resources;
 
-use App\Filament\Resources\RestaurantResource\Pages;
-use App\Filament\Resources\RestaurantResource\RelationManagers;
+use App\Filament\Manager\Resources\RestaurantResource\Pages;
+use App\Filament\Manager\Resources\RestaurantResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Restaurant;
 use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RestaurantResource extends Resource
 {
     protected static ?string $model = Restaurant::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     public static function form(Form $form): Form
     {
+        $categories = Category::pluck('name', 'id')->toArray();
+        
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\Section::make('Basic Details')
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                    ->label('Restaurant Name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('address')
+                Forms\Components\Select::make('category_id')
+                    ->label('Food Category')
                     ->required()
-                    ->maxLength(255),
+                    ->options(
+                        Category::pluck('name','id')
+                    ),
                 Forms\Components\TextInput::make('phone_number')
                     ->tel()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(30),
+                ])->columns(3),
+                Forms\Components\Textarea::make('address')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('category_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('manager_id')
-                    ->numeric(),
                 Forms\Components\Toggle::make('is_approved')
-                    ->required(),
+                    ->required()
+                    ->hidden()
+                    ->disabled(),
+                Forms\Components\Toggle::make('status')
+                    ->default(false)
+                    ->required()
+                    ->hidden(),
+                Hidden::make('manager_id')
+                ->default(auth()->user()->id)
             ]);
     }
 
@@ -51,7 +70,8 @@ class RestaurantResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Restaurant Name'),
                 Tables\Columns\TextColumn::make('address')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone_number')
@@ -72,6 +92,8 @@ class RestaurantResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('status')
+                    ->boolean(),
             ])
             ->filters([
                 //
@@ -82,7 +104,6 @@ class RestaurantResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -102,5 +123,16 @@ class RestaurantResource extends Resource
             'view' => Pages\ViewRestaurant::route('/{record}'),
             'edit' => Pages\EditRestaurant::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('manager_id', auth()->id());
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return abort(403);
     }
 }

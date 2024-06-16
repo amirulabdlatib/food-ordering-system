@@ -24,6 +24,7 @@ class CustomerPanelProvider extends PanelProvider
     {
         return $panel
             ->id('customer')
+            ->sidebarCollapsibleOnDesktop()
             ->path('customer')
             ->login()
             ->registration()
@@ -35,7 +36,7 @@ class CustomerPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Customer/Resources'), for: 'App\\Filament\\Customer\\Resources')
             ->discoverPages(in: app_path('Filament/Customer/Pages'), for: 'App\\Filament\\Customer\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                // Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Customer/Widgets'), for: 'App\\Filament\\Customer\\Widgets')
             ->widgets([

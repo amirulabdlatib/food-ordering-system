@@ -1,48 +1,45 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Manager\Resources;
 
-use App\Filament\Resources\RestaurantResource\Pages;
-use App\Filament\Resources\RestaurantResource\RelationManagers;
-use App\Models\Restaurant;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Menu;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Restaurant;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Manager\Resources\MenuResource\Pages;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use App\Filament\Manager\Resources\MenuResource\RelationManagers;
 
-class RestaurantResource extends Resource
+class MenuResource extends Resource
 {
-    protected static ?string $model = Restaurant::class;
+    protected static ?string $model = Menu::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-bars-4';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('restaurant.name')
+                    ->label('Restaurant Name')
+                    ->required()
+                    ->numeric(),
                 Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('address')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('phone_number')
-                    ->tel()
+                    ->label('Item')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('category_id')
+                Forms\Components\TextInput::make('price')
+                    ->label('Price (RM)')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('manager_id')
-                    ->numeric(),
-                Forms\Components\Toggle::make('is_approved')
-                    ->required(),
             ]);
     }
 
@@ -50,20 +47,16 @@ class RestaurantResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('restaurant.name')
+                    ->numeric()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Item')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('address')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('phone_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('category.name')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('price')
+                    ->money('myr',2)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('manager.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('is_approved')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -97,10 +90,17 @@ class RestaurantResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRestaurants::route('/'),
-            'create' => Pages\CreateRestaurant::route('/create'),
-            'view' => Pages\ViewRestaurant::route('/{record}'),
-            'edit' => Pages\EditRestaurant::route('/{record}/edit'),
+            'index' => Pages\ListMenus::route('/'),
+            'create' => Pages\CreateMenu::route('/create'),
+            'view' => Pages\ViewMenu::route('/{record}'),
+            'edit' => Pages\EditMenu::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $userRestaurantIds = Restaurant::where('manager_id', auth()->id())->pluck('id');
+        return parent::getEloquentQuery()->whereIn('restaurant_id', $userRestaurantIds);
+    }
+
 }
