@@ -6,9 +6,11 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -26,7 +28,12 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('role')
+                Forms\Components\Select::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'manager' => 'Manager',
+                        'customer' => 'Customer',
+                    ])
                     ->required(),
                 Forms\Components\TextInput::make('email')
                     ->email()
@@ -46,7 +53,17 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role'),
+                Tables\Columns\TextColumn::make('role')
+                    ->sortable()
+                    ->badge()
+                    ->color(function ($state){
+                        if ($state === 'admin') {
+                            return 'success';
+                        } elseif ($state === 'manager') {
+                            return 'info';
+                        }
+                        return 'primary';
+                    }),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email_verified_at')
@@ -63,6 +80,12 @@ class UserResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'manager' => 'Manager',
+                        'customer' => 'Customer',
+                    ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
