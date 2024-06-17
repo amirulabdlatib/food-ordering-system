@@ -2,17 +2,20 @@
 
 namespace App\Filament\Manager\Resources;
 
+use Filament\Forms;
+use App\Models\Sale;
+use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Restaurant;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Manager\Resources\SaleResource\Pages;
 use App\Filament\Manager\Resources\SaleResource\RelationManagers;
-use App\Models\Sale;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
 
 class SaleResource extends Resource
 {
@@ -27,8 +30,6 @@ class SaleResource extends Resource
                 Forms\Components\TextInput::make('restaurant_id')
                     ->required()
                     ->numeric(),
-                Forms\Components\DatePicker::make('date')
-                    ->required(),
                 Forms\Components\TextInput::make('total_sales')
                     ->required()
                     ->numeric(),
@@ -39,11 +40,9 @@ class SaleResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('restaurant_id')
+                Tables\Columns\TextColumn::make('restaurant.name')
+                    ->searchable()
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('date')
-                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_sales')
                     ->numeric()
@@ -59,6 +58,11 @@ class SaleResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('restaurant_id')
+                    ->options(
+                        Restaurant::where('manager_id',auth()->user()->id)
+                            ->pluck('name','id')
+                    )
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -79,22 +83,31 @@ class SaleResource extends Resource
     }
 
     public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->where('id', auth()->id());
-    }
+{
+    $userRestaurantIds = Restaurant::where('manager_id', auth()->id())->pluck('id');
+
+    return parent::getEloquentQuery()
+        ->whereHas('restaurant', function ($query) use ($userRestaurantIds) {
+            $query->whereIn('id', $userRestaurantIds);
+        });
+}
+
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListSales::route('/'),
-            'create' => Pages\CreateSale::route('/create'),
             'view' => Pages\ViewSale::route('/{record}'),
             'edit' => Pages\EditSale::route('/{record}/edit'),
         ];
     }
     
     public static function canDelete(Model $record): bool
+    {
+        return abort(403);
+    }
+
+    public static function canCreate(): bool
     {
         return abort(403);
     }

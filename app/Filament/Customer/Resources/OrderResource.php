@@ -11,10 +11,13 @@ use App\Models\Restaurant;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Customer\Resources\OrderResource\Pages;
 use App\Filament\Customer\Resources\OrderResource\RelationManagers;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
 
 class OrderResource extends Resource
 {
@@ -111,9 +114,6 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('restaurant.name')
                     ->numeric()
                     ->sortable(),
@@ -125,6 +125,14 @@ class OrderResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order_status')
                     ->badge()
+                    ->color(function ($state){
+                        if ($state === 'accepted') {
+                            return 'success';
+                        } elseif ($state === 'submitted') {
+                            return 'info';
+                        }
+                        return 'danger';
+                    })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -137,7 +145,24 @@ class OrderResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                SelectFilter::make('restaurant_id')
+                    ->label('Restaurant Name')
+                    ->options(
+                        Restaurant::pluck('name','id')
+                    ),
+                SelectFilter::make('order_type')
+                    ->options([
+                        "delivery"=>"Delivery",
+                        "pickup"=>"Pickup"
+                    ]),
+                SelectFilter::make('order_status')
+                    ->options([
+                        "submitted"=>"Submitted",
+                        "accepted"=>"Accepted",
+                        "rejected"=>"Rejected"
+                    ])
+            ],layout:FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])

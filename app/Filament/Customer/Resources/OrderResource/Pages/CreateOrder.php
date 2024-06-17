@@ -2,10 +2,11 @@
 
 namespace App\Filament\Customer\Resources\OrderResource\Pages;
 
-use App\Filament\Customer\Resources\OrderResource;
 use Filament\Actions;
-use Filament\Resources\Pages\CreateRecord;
+use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Customer\Resources\OrderResource;
 
 class CreateOrder extends CreateRecord
 {
@@ -35,6 +36,12 @@ class CreateOrder extends CreateRecord
                 'quantity' => $menuItem['quantity'],
             ]);
         }
+
+        $restaurant = Restaurant::findOrFail($data['restaurant_id']);
+        $sale = $restaurant->sales()->create([
+            'total_sales' => $order->total_amount,
+        ]);
+
         return $order;
     }
 
