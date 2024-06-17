@@ -2,22 +2,27 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\RestaurantResource\Pages;
-use App\Filament\Resources\RestaurantResource\RelationManagers;
-use App\Models\Restaurant;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use App\Models\Category;
+use Filament\Forms\Form;
+use App\Models\Restaurant;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\RestaurantResource\Pages;
+use App\Filament\Resources\RestaurantResource\RelationManagers;
 
 class RestaurantResource extends Resource
 {
     protected static ?string $model = Restaurant::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     public static function form(Form $form): Form
     {
@@ -36,13 +41,25 @@ class RestaurantResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('category_id')
+                Forms\Components\Select::make('category_id')
                     ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('manager_id')
-                    ->numeric(),
+                    ->searchable()
+                    ->preload()
+                    ->options(
+                        Category::pluck('name','id')
+                    ),
+                Forms\Components\Select::make('manager_id')
+                    ->preload()
+                    ->searchable()
+                    ->options(
+                        User::where('role','manager')
+                            ->pluck('name','id')
+                    ),
                 Forms\Components\Toggle::make('is_approved')
+                    ->label('Approved')
                     ->required(),
+                Forms\Components\Toggle::make('status')
+                    ->required()
             ]);
     }
 
@@ -51,6 +68,7 @@ class RestaurantResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Restaurant Name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('address')
                     ->searchable(),
@@ -63,7 +81,12 @@ class RestaurantResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_approved')
-                    ->boolean(),
+                    ->label('Approved')
+                    ->boolean()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('status')
+                    ->boolean()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -75,7 +98,40 @@ class RestaurantResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                SelectFilter::make('id')
+                    ->label('Restaurant Name')
+                    ->preload()
+                    ->searchable()
+                    ->options(
+                        Restaurant::pluck('name','id')
+                    ),
+                SelectFilter::make('category_id')
+                    ->preload()
+                    ->searchable()
+                    ->options(
+                        Category::pluck('name','id')
+                    ),
+                SelectFilter::make('manager_id')
+                    ->label('Manager Name')
+                    ->preload()
+                    ->searchable()
+                    ->options(
+                        User::where('role','manager')
+                            ->pluck('name','id')
+                    ),
+                SelectFilter::make('is_approved')
+                    ->label('Approval Status')
+                    ->options([
+                        '1' => 'Approved',
+                        '0' => 'Not Approved',
+                    ]),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        '0' => 'Banned',
+                        '1' => 'Not Banned',
+                    ])                     
+            ],layout:FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
