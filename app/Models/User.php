@@ -48,4 +48,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Restaurant::class, 'manager_id');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    public function loyaltyPoint()
+    {
+        return $this->hasOne(LoyaltyPoint::class, 'customer_id');
+    }
+
 }

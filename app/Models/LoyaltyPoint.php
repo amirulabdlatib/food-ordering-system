@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class LoyaltyPoint extends Model
 {
     use HasFactory;
-    protected $guarded=[];
+    protected $guarded = [];
 
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 }
