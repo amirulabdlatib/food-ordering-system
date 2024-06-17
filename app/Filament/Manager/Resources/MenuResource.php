@@ -12,7 +12,7 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Manager\Resources\MenuResource\Pages;
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use Filament\Forms\Components\Grid;
 use App\Filament\Manager\Resources\MenuResource\RelationManagers;
 
 class MenuResource extends Resource
@@ -25,21 +25,31 @@ class MenuResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('restaurant.name')
-                    ->label('Restaurant Name')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('name')
-                    ->label('Item')
-                    ->required()
-                    ->maxLength(255),
+                Grid::make(3)
+                    ->schema([
+                    Forms\Components\Select::make('restaurant_id')
+                        ->label('Restaurant Name')
+                        ->required()
+                        ->options(
+                            function () {
+                                return Restaurant::where('manager_id', auth()->id())
+                                    ->where('is_approved',true)
+                                    ->where('status',true)
+                                    ->pluck('name', 'id');
+                            }
+                        ),
+                    Forms\Components\TextInput::make('name')
+                        ->label('Item')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('price')
+                        ->label('Price (RM)')
+                        ->required()
+                        ->numeric(),
+                    ]),
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('price')
-                    ->label('Price (RM)')
-                    ->required()
-                    ->numeric(),
             ]);
     }
 
@@ -55,7 +65,7 @@ class MenuResource extends Resource
                     ->label('Item')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money('myr',2)
+                    ->formatStateUsing(fn ($state) => number_format($state, 2))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

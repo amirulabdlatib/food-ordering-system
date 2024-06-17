@@ -14,4 +14,8 @@ class CreateRestaurant extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+    public function getTitle(): string
+    {
+        return 'Register Restaurant'; 
+    }
 }
