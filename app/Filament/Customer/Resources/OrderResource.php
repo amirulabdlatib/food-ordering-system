@@ -91,10 +91,6 @@ class OrderResource extends Resource
                     'pickup' => 'Pickup',
                 ])
                 ->required(),
-            Forms\Components\TextInput::make('total_amount')
-                ->label('Total Amount')
-                ->readOnly()
-                ->numeric(),
             Forms\Components\Select::make('payment_method')
                 ->options([
                     'stripe' => 'Stripe',
@@ -103,6 +99,10 @@ class OrderResource extends Resource
             Forms\Components\Hidden::make('order_status')
                 ->default('submitted')
                 ->required(),
+            Forms\Components\TextInput::make('total_amount')
+                ->label('Total Amount')
+                ->readOnly()
+                ->numeric(),
         ]);
     }
 
