@@ -2,17 +2,18 @@
 
 namespace App\Filament\Customer\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Order;
+use Filament\Forms\Form;
+use App\Models\Restaurant;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Customer\Resources\OrderResource\Pages;
 use App\Filament\Customer\Resources\OrderResource\RelationManagers;
-use App\Models\Order;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource
 {
@@ -20,26 +21,45 @@ class OrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('customer_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('restaurant_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('order_type')
+                Forms\Components\Hidden::make('customer_id')
+                    ->default(auth()->user()->id)
                     ->required(),
+                Forms\Components\Select::make('restaurant_id')
+                    ->label('Restaurant Name')
+                    ->options(
+                        function () {
+                            return Restaurant::where('is_approved',true)
+                                ->where('status',true)
+                                ->pluck('name', 'id');
+                        }
+                    )
+                    ->required(),
+                Forms\Components\Select::make('order_type')
+                    ->options([
+                            'delivery' => 'Delivery',
+                            'pickup' => 'Pickup',
+                        ]
+                    )
+                    ->required()
+                    ,
                 Forms\Components\TextInput::make('total_amount')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('payment_method')
+                Forms\Components\Select::make('payment_method')
+                    ->options([
+                        'stripe' => 'Stripe',
+                    ])
+                    ->required(),
+                Forms\Components\Hidden::make('order_status')
+                    ->default('submitted')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('order_status')
-                    ->required()
-                    ->maxLength(255),
+                    
             ]);
     }
 
