@@ -102,6 +102,7 @@ class OrderResource extends Resource
             Forms\Components\TextInput::make('total_amount')
                 ->label('Total Amount')
                 ->readOnly()
+                ->required()
                 ->numeric(),
         ]);
     }
@@ -113,7 +114,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('customer_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('restaurant_id')
+                Tables\Columns\TextColumn::make('restaurant.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order_type'),
@@ -123,6 +124,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('payment_method')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order_status')
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

@@ -6,9 +6,11 @@ use App\Filament\Manager\Resources\OrderResource\Pages;
 use App\Filament\Manager\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -25,21 +27,29 @@ class OrderResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('customer_id')
-                    ->numeric(),
+                    ->numeric()
+                    ->readOnly(),
                 Forms\Components\TextInput::make('restaurant_id')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->readOnly(),
                 Forms\Components\TextInput::make('order_type')
-                    ->required(),
+                    ->required()
+                    ->readOnly(),
                 Forms\Components\TextInput::make('total_amount')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->readOnly(),
                 Forms\Components\TextInput::make('payment_method')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('order_status')
+                    ->maxLength(255)
+                    ->readOnly(),
+                Forms\Components\Select::make('order_status')
+                    ->options([
+                    "accepted"=>"Accepted",
+                    "rejected"=>"Rejected"
+                ])
                     ->required()
-                    ->maxLength(255),
             ]);
     }
 
@@ -47,10 +57,10 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer_id')
+                Tables\Columns\TextColumn::make('customer.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('restaurant_id')
+                Tables\Columns\TextColumn::make('restaurant.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order_type'),
@@ -60,11 +70,19 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('payment_method')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('order_status')
+                    ->badge()
+                    ->color(function ($state){
+                        if ($state === 'accepted') {
+                            return 'success';
+                        } elseif ($state === 'submitted') {
+                            return 'info';
+                        }
+                        return 'danger';
+                    })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -72,6 +90,18 @@ class OrderResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('order_status')
+                    ->options([
+                        "submitted"=>"Submitted",
+                        "accepted"=>"Accepted",
+                        "rejected"=>"Rejected"
+                    ]),
+                SelectFilter::make('order_type')
+                    ->options([
+                        "delivery"=>"Delivery",
+                        "pickup"=>"Pickup",
+                       
+                    ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -112,6 +142,8 @@ class OrderResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('id', auth()->id());
+            ->whereHas('restaurant', function ($query) {
+                $query->where('manager_id', auth()->user()->id); // can auth()->id()
+            });
     }
 }

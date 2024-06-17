@@ -8,9 +8,11 @@ use App\Models\Category;
 use App\Models\Restaurant;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -97,6 +99,11 @@ class RestaurantResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('category_id')
+                    ->label('Category Name')
+                    ->options(
+                        Category::pluck('name','id')
+                    )
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

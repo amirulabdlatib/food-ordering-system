@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Manager\Resources\MenuResource\Pages;
 use Filament\Forms\Components\Grid;
 use App\Filament\Manager\Resources\MenuResource\RelationManagers;
+use Filament\Tables\Filters\SelectFilter;
 
 class MenuResource extends Resource
 {
@@ -63,6 +64,7 @@ class MenuResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Item')
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->formatStateUsing(fn ($state) => number_format($state, 2))
@@ -78,6 +80,11 @@ class MenuResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('restaurant_id')
+                ->options(
+                    Restaurant::where('manager_id',auth()->id())
+                        ->pluck('name','id')
+                )
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
