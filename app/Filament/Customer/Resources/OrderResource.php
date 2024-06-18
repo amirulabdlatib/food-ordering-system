@@ -192,4 +192,10 @@ class OrderResource extends Resource
     {
         return abort(403);
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('customer_id', auth()->id());
+    }
 }
