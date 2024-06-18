@@ -1,9 +1,13 @@
 <?php
 
-use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\MenuController;
+use App\Http\Controllers\API\SaleController;
+use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\LoyaltyPointsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::apiResource('users',UserController::class);
 Route::apiResource('categories',CategoryController::class);
+Route::apiResource('sales',SaleController::class);
+Route::apiResource('orders',OrderController::class);
+Route::apiResource('menus',MenuController::class);
+Route::apiResource('loyalty-points', LoyaltyPointsController::class);
