@@ -41,7 +41,7 @@ class MenuResource extends Resource
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ,
             ]);
     }
 
@@ -56,7 +56,8 @@ class MenuResource extends Resource
                 ->label('Item')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->label('Price (RM)')
+                    ->formatStateUsing(fn ($state) => number_format($state, 2))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

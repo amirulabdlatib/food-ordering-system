@@ -3,6 +3,7 @@
 namespace App\Filament\Customer\Resources\OrderResource\Pages;
 
 use Filament\Actions;
+use Stripe\StripeClient;
 use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\CreateRecord;
@@ -38,11 +39,40 @@ class CreateOrder extends CreateRecord
         }
 
         $restaurant = Restaurant::findOrFail($data['restaurant_id']);
-        $sale = $restaurant->sales()->create([
+        $restaurant->sales()->create([
             'total_sales' => $order->total_amount,
         ]);
 
+        // Create Stripe session after order creation
+        $this->createStripeSession($order);
+
         return $order;
+    }
+
+    protected function createStripeSession($order)
+    {
+        $stripe = new StripeClient(env('STRIPE_SECRET_KEY'));
+
+        $session = $stripe->checkout->sessions->create([
+            'line_items'=> [
+                [
+                    'price_data'=>[
+                        'currency' => 'myr',
+                        'product_data' => [
+                            'name'=> 'Send me money!!!',
+                        ],
+                        'unit_amount'=> 500    
+                    ],
+                    'quantity' => 1
+                ],
+            ],
+            'mode'=> 'payment',
+            'success_url'=>url('/customer/orders'),
+            'cancel_url'=>url('/customer/orders')
+        ]);
+
+        // Redirect to Stripe session URL
+        return redirect($session->url);
     }
 
     protected function getFormActions(): array
