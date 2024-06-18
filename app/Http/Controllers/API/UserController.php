@@ -18,8 +18,12 @@ class UserController extends Controller
     public function index()
     {
         //
-        $users = User::all();
-        return UserResource::collection($users, 200);
+        try {
+            $users = User::all();
+            return UserResource::collection($users, 200);
+        }catch(\Exception){
+            return response()->json(['error' => 'An unexpected error occurred'], 500);
+        }
     }
 
     /**
