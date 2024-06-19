@@ -16,8 +16,14 @@ class CreateOrder extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
+        // dd($this->getResource()::getUrl('index'));
         return $this->getResource()::getUrl('index');
-        // return "Hello World"; => http://127.0.0.1:8001/customer/orders/Hello%20World
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['customer_id'] = auth()->id();
+        return array_merge($data, $this->createStripeSession($data));
     }
 
     protected function handleRecordCreation(array $data): Model
@@ -29,12 +35,9 @@ class CreateOrder extends CreateRecord
                 'restaurant_id' => $data['restaurant_id'],
                 'order_type' => $data['order_type'],
                 'payment_method' => $data['payment_method'],
-                'order_status' => $data['order_status'], //payment pending
+                'order_status' => $data['order_status'],
                 'total_amount' => $data['total_amount'],
             ]);
-
-        // Create Stripe session after order creation
-        $this->createStripeSession($order);
 
         foreach ($data['menu_items'] as $menuItem) {
             $order->orderItems()->create([
@@ -69,28 +72,34 @@ class CreateOrder extends CreateRecord
 
     protected function createStripeSession($order)
     {
-        $stripe = new StripeClient(env('STRIPE_SECRET_KEY'));
+        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
-        $session = $stripe->checkout->sessions->create([
+        // Create a new Price object - dummy data
+        $price = \Stripe\Price::create([
+            'product_data' => [
+                'name' => 'Product Name',
+            ],
+            'unit_amount' => 10000, // Amount in cents
+            'currency' => 'myr',
+        ]);
+
+        $checkout_session = \Stripe\Checkout\Session::create([
             'line_items' => [
                 [
-                    'price_data' => [
-                        'currency' => 'myr',
-                        'product_data' => [
-                            'name' => 'Send some money!!!',
-                        ],
-                        'unit_amount' => 500,
-                    ],
+                    'price' => $price->id,
                     'quantity' => 1,
                 ],
             ],
             'mode' => 'payment',
-            'success_url' => url('/customer/orders'),
-            'cancel_url' => url('/customer/orders'),
+            'success_url' => route('filament.customer.resources.orders.index'),
+            'cancel_url' => route('filament.customer.resources.orders.index'),
         ]);
 
-        // Redirect to Stripe session URL
-        return redirect($session->url);
+        // Return the session data as an array
+        return [
+            'stripe_session_id' => $checkout_session->id,
+            'stripe_session_url' => $checkout_session->url,
+        ];
     }
 
     protected function getFormActions(): array
@@ -101,11 +110,5 @@ class CreateOrder extends CreateRecord
                 ->color('primary')
                 ->extraAttributes(['style' => 'width: 100%;']),
         ];
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['customer_id'] = auth()->id();
-        return $data;
     }
 }
