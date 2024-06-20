@@ -70,37 +70,6 @@ class CreateOrder extends CreateRecord
         return $order;
     }
 
-    protected function createStripeSession($order)
-    {
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-
-        // Create a new Price object - dummy data
-        $price = \Stripe\Price::create([
-            'product_data' => [
-                'name' => 'Product Name',
-            ],
-            'unit_amount' => 10000, // Amount in cents
-            'currency' => 'myr',
-        ]);
-
-        $checkout_session = \Stripe\Checkout\Session::create([
-            'line_items' => [
-                [
-                    'price' => $price->id,
-                    'quantity' => 1,
-                ],
-            ],
-            'mode' => 'payment',
-            'success_url' => route('filament.customer.resources.orders.index'),
-            'cancel_url' => route('filament.customer.resources.orders.index'),
-        ]);
-
-        // Return the session data as an array
-        return [
-            'stripe_session_id' => $checkout_session->id,
-            'stripe_session_url' => $checkout_session->url,
-        ];
-    }
 
     protected function getFormActions(): array
     {
