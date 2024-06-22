@@ -147,4 +147,11 @@ class OrderResource extends Resource
                 $query->where('manager_id', auth()->user()->id); // can auth()->id()
             });
     }
+
+    public static function getNavigationBadge(): ?string
+{
+    return static::getEloquentQuery()
+                    ->where('order_status', 'paid')
+                    ->count();
+}
 }
