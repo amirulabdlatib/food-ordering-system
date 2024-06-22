@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Customer\Resources\OrderResource;
 use App\Models\LoyaltyPoint;
+use GuzzleHttp\Client;
+use Filament\Notifications\Notification;
+
 
 class CreateOrder extends CreateRecord
 {
@@ -20,10 +23,46 @@ class CreateOrder extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
+    // protected function customer_checkout(array $data)
+    // {
+    //     $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
+
+    //     // Create a new Price object
+    //     $price = $stripe->prices->create([
+    //         'product_data' => [
+    //             'name' => 'Product Name',
+    //         ],
+    //         'unit_amount' => 10000, // Amount in cents
+    //         'currency' => 'myr',
+    //     ]);
+
+    //     // Create a new Checkout Session
+    //     $session = $stripe->checkout->sessions->create([
+    //         'line_items' => [
+    //             [
+    //                 'price' => $price->id,
+    //                 'quantity' => 1,
+    //             ],
+    //         ],
+    //         'mode' => 'payment',
+    //         'success_url' => route('filament.customer.resources.orders.index'),
+    //         'cancel_url' => route('filament.customer.resources.orders.index'),
+    //         'client_reference_id' => $data['customer_id'],
+    //     ]);
+
+    //     $checkoutSessionUrl = "https://checkout.stripe.com/c/pay/{$session->id}";
+
+    //     return redirect($checkoutSessionUrl);
+    // }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['customer_id'] = auth()->id();
-        return array_merge($data, $this->createStripeSession($data));
+
+        // Call the checkout method
+        // $this->customer_checkout($data);
+
+        return $data;
     }
 
     protected function handleRecordCreation(array $data): Model
@@ -70,38 +109,6 @@ class CreateOrder extends CreateRecord
         return $order;
     }
 
-    protected function createStripeSession($order)
-    {
-        \Stripe\Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
-
-        // Create a new Price object - dummy data
-        $price = \Stripe\Price::create([
-            'product_data' => [
-                'name' => 'Product Name',
-            ],
-            'unit_amount' => 10000, // Amount in cents
-            'currency' => 'myr',
-        ]);
-
-        $checkout_session = \Stripe\Checkout\Session::create([
-            'line_items' => [
-                [
-                    'price' => $price->id,
-                    'quantity' => 1,
-                ],
-            ],
-            'mode' => 'payment',
-            'success_url' => route('filament.customer.resources.orders.index'),
-            'cancel_url' => route('filament.customer.resources.orders.index'),
-        ]);
-
-        // Return the session data as an array
-        return [
-            'stripe_session_id' => $checkout_session->id,
-            'stripe_session_url' => $checkout_session->url,
-        ];
-    }
-
     protected function getFormActions(): array
     {
         return [
@@ -110,5 +117,14 @@ class CreateOrder extends CreateRecord
                 ->color('primary')
                 ->extraAttributes(['style' => 'width: 100%;']),
         ];
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+                ->title('Order Created Successfully')
+                ->body('Your order has been placed and is being processed. Please pay for your order')
+                ->success()
+                ->send();
     }
 }

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Customer\Resources\OrderResource\Pages;
 use App\Filament\Customer\Resources\OrderResource\RelationManagers;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Filters\SelectFilter;
 
@@ -143,6 +144,7 @@ class OrderResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at','desc')
             ->filters([
                 //
                 SelectFilter::make('restaurant_id')
@@ -158,6 +160,7 @@ class OrderResource extends Resource
                 SelectFilter::make('order_status')
                     ->options([
                         "submitted"=>"Submitted",
+                        "paid"=>"Paid",
                         "accepted"=>"Accepted",
                         "rejected"=>"Rejected"
                     ])
@@ -165,6 +168,8 @@ class OrderResource extends Resource
             ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('Pay')
+                    ->url(fn (Order $record): string => route('customer.orders.pay', $record))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
