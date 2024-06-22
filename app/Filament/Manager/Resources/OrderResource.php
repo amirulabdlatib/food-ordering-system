@@ -149,9 +149,9 @@ class OrderResource extends Resource
     }
 
     public static function getNavigationBadge(): ?string
-{
-    return static::getEloquentQuery()
-                    ->where('order_status', 'paid')
-                    ->count();
-}
+    {
+        return static::getEloquentQuery()
+                        ->where('order_status', 'paid')
+                        ->count();
+    }
 }
