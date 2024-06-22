@@ -44,7 +44,7 @@ class PaymentController extends Controller
     {
         $order->update(['order_status' => 'paid']);
 
-        return view('success', compact('order'));
+        return redirect('/customer');
     }
 
     public function cancel(Order $order)

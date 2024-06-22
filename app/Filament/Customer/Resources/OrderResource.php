@@ -160,6 +160,7 @@ class OrderResource extends Resource
                 SelectFilter::make('order_status')
                     ->options([
                         "submitted"=>"Submitted",
+                        "paid"=>"Paid",
                         "accepted"=>"Accepted",
                         "rejected"=>"Rejected"
                     ])

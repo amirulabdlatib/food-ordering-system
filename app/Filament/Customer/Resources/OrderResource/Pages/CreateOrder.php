@@ -10,6 +10,8 @@ use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Customer\Resources\OrderResource;
 use App\Models\LoyaltyPoint;
 use GuzzleHttp\Client;
+use Filament\Notifications\Notification;
+
 
 class CreateOrder extends CreateRecord
 {
@@ -115,5 +117,14 @@ class CreateOrder extends CreateRecord
                 ->color('primary')
                 ->extraAttributes(['style' => 'width: 100%;']),
         ];
+    }
+
+    protected function getCreatedNotification(): ?Notification
+    {
+        return Notification::make()
+                ->title('Order Created Successfully')
+                ->body('Your order has been placed and is being processed. Please pay for your order')
+                ->success()
+                ->send();
     }
 }
