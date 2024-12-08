@@ -53,7 +53,6 @@ class ManagerPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                'manager'
             ])
             ->authMiddleware([
                 Authenticate::class,
