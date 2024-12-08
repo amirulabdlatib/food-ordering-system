@@ -59,7 +59,9 @@ class OrderResource extends Resource
                             }
                         )
                         ->required()
-                        ->reactive(),
+                        ->reactive()
+                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                        ->distinct(),
                     Forms\Components\TextInput::make('quantity')
                         ->label('Quantity')
                         ->numeric()
